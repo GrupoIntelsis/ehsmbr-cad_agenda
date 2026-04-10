@@ -1,9 +1,7 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel",
-    "sap/m/MessageBox",
-    "sap/base/Log"
-], (Controller, JSONModel, MessageBox, Log) => {
+    "sap/ui/model/json/JSONModel"
+], (Controller, JSONModel) => {
     "use strict";
 
     const EMPTY_SELECTED_ITEM = {
@@ -19,30 +17,33 @@ sap.ui.define([
                 layout: "OneColumn",
                 selectedItem: { ...EMPTY_SELECTED_ITEM }
             }), "view");
-
-            this.onSearch();
         },
 
         onSearch() {
-            const oDataModel = this.getOwnerComponent().getModel();
-            const oSmartFilterBar = this.byId("smartFilterBar");
-            const aFilters = oSmartFilterBar ? oSmartFilterBar.getFilters() : [];
+            const oSmartTable = this.byId("smartTreeTable");
+            if (oSmartTable) {
+                oSmartTable.rebindTable();
+            }
+        },
 
-            oDataModel.read("/EstruturaSet", {
-                filters: aFilters,
-                success: (oData) => {
-                    const aResults = (oData && oData.results) || [];
-                    const aTreeRows = this._buildHierarchyTree(aResults);
+        onSmartTableInitialise() {
+            const oInnerTable = this.byId("smartTreeTable").getTable();
+            if (oInnerTable && oInnerTable.attachRowSelectionChange) {
+                oInnerTable.setSelectionMode("Single");
+                oInnerTable.attachRowSelectionChange(this.onRowSelectionChange, this);
+            }
+        },
 
-                    const oTreeModel = new JSONModel({ rows: aTreeRows });
-                    oTreeModel.setSizeLimit(Math.max(aResults.length, 1000));
-                    this.getView().setModel(oTreeModel, "tree");
-                },
-                error: (oError) => {
-                    Log.error("Falha ao ler EstruturaSet.", oError);
-                    MessageBox.error("Falha ao buscar estruturas.");
-                }
-            });
+        onBeforeRebindTreeTable(oEvent) {
+            const oBindingParams = oEvent.getParameter("bindingParams") || {};
+            oBindingParams.parameters = oBindingParams.parameters || {};
+            oBindingParams.parameters.treeAnnotationProperties = {
+                hierarchyLevelFor: "HierLevel",
+                hierarchyNodeFor: "DbKey",
+                hierarchyParentNodeFor: "ParentKey",
+                hierarchyDrillStateFor: "DrillState"
+            };
+            oBindingParams.parameters.numberOfExpandedLevels = 1;
         },
 
         onRowSelectionChange(oEvent) {
@@ -75,51 +76,16 @@ sap.ui.define([
             const oViewModel = this.getView().getModel("view");
             oViewModel.setProperty("/layout", "OneColumn");
             oViewModel.setProperty("/selectedItem", { ...EMPTY_SELECTED_ITEM });
-            this.byId("treeTable").clearSelection();
+            const oInnerTable = this.byId("smartTreeTable").getTable();
+            if (oInnerTable && oInnerTable.clearSelection) {
+                oInnerTable.clearSelection();
+            }
         },
 
         onPressCriar() {
         },
 
         onPressDeletar() {
-        },
-
-        _buildHierarchyTree(aFlatRows) {
-            const aNodes = aFlatRows.map((oRow, iIndex) => {
-                return {
-                    ...oRow,
-                    _uid: `${oRow.ParentKey || "ROOT"}-${oRow.DbKey || "NO_KEY"}-${iIndex}`,
-                    children: []
-                };
-            });
-
-            const mNodesByKey = new Map();
-            aNodes.forEach((oNode) => {
-                const sKey = oNode.DbKey || "";
-                if (!mNodesByKey.has(sKey)) {
-                    mNodesByKey.set(sKey, []);
-                }
-                mNodesByKey.get(sKey).push(oNode);
-            });
-
-            const aRootNodes = [];
-            aNodes.forEach((oNode) => {
-                const sParentKey = (oNode.ParentKey || "").trim();
-                if (!sParentKey) {
-                    aRootNodes.push(oNode);
-                    return;
-                }
-
-                const aParentCandidates = mNodesByKey.get(sParentKey) || [];
-                if (!aParentCandidates.length) {
-                    aRootNodes.push(oNode);
-                    return;
-                }
-
-                aParentCandidates[0].children.push(oNode);
-            });
-
-            return aRootNodes;
         }
     });
 });

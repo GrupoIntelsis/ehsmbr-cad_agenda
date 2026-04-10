@@ -7,7 +7,8 @@
     xmlns:uxap="sap.uxap"
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
     xmlns:smartTable="sap.ui.comp.smarttable"
-    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
     <f:FlexibleColumnLayout id="mainFcl" layout="{view>/layout}" backgroundDesign="Transparent">
         <f:beginColumnPages>
             <f:DynamicPage id="listReportPage" preserveHeaderStateOnScroll="true" headerExpanded="true">
@@ -26,7 +27,8 @@
                                 id="smartFilterBar"
                                 entitySet="EstruturaSet"
                                 useToolbar="true"
-                                search="onSearch">
+                                search="onSearch"
+                            >
                                 <smartFilterBar:controlConfiguration>
                                     <smartFilterBar:ControlConfiguration key="DbKey" label="Codigo" visibleInAdvancedArea="true"/>
                                     <smartFilterBar:ControlConfiguration key="Descricao" label="Descricao" visibleInAdvancedArea="true"/>
@@ -49,42 +51,13 @@
                         useVariantManagement="false"
                         useTablePersonalisation="true"
                         showRowCount="false"
-                        enableAutoBinding="false"
-                        header="Estrutura da agenda medica">
-                        <table:TreeTable
-                            id="treeTable"
-                            selectionMode="Single"
-                            enableColumnReordering="false"
-                            rowSelectionChange="onRowSelectionChange"
-                            visibleRowCountMode="Auto"
-                            minAutoRowCount="12"
-                            rows="{
-                                path: 'tree>/rows',
-                                parameters: {
-                                    arrayNames: ['children']
-                                }
-                            }">
-                            <table:columns>
-                                <table:Column>
-                                    <Label text="Codigo"/>
-                                    <table:template>
-                                        <Text text="{tree>DbKey}" wrapping="false"/>
-                                    </table:template>
-                                </table:Column>
-                                <table:Column>
-                                    <Label text="Descricao"/>
-                                    <table:template>
-                                        <Text text="{tree>Descricao}" wrapping="false"/>
-                                    </table:template>
-                                </table:Column>
-                                <table:Column>
-                                    <Label text="Tipo"/>
-                                    <table:template>
-                                        <Text text="{tree>Tipo}" wrapping="false"/>
-                                    </table:template>
-                                </table:Column>
-                            </table:columns>
-                        </table:TreeTable>
+                        enableAutoBinding="true"
+                        initiallyVisibleFields="DbKey,ParentKey,Descricao,Tipo"
+                        enableAutoColumnWidth="true"
+                        initialise="onSmartTableInitialise"
+                        beforeRebindTable="onBeforeRebindTreeTable"
+                        header="Estrutura da agenda médica"
+                    >
                         <smartTable:customToolbar>
                             <OverflowToolbar>
                                 <ToolbarSpacer/>
@@ -119,7 +92,8 @@
                 enableLazyLoading="true"
                 useIconTabBar="true"
                 headerContentPinned="true"
-                upperCaseAnchorBar="false">
+                upperCaseAnchorBar="false"
+            >
                 <uxap:headerTitle>
                     <uxap:ObjectPageDynamicHeaderTitle>
                         <uxap:expandedHeading>
