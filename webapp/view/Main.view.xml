@@ -1,0 +1,195 @@
+<mvc:View 
+    xmlns:table="sap.ui.table" 
+    controllerName="ehsmbr.cadagenda.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:uxap="sap.uxap"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+    <f:FlexibleColumnLayout id="mainFcl" layout="{view>/layout}" backgroundDesign="Transparent">
+        <f:beginColumnPages>
+            <f:DynamicPage id="listReportPage" preserveHeaderStateOnScroll="true" headerExpanded="true">
+                <f:title>
+                    <f:DynamicPageTitle>
+                        <f:heading>
+                            <Title text="Cadastro de Agenda"/>
+                        </f:heading>
+                    </f:DynamicPageTitle>
+                </f:title>
+
+                <f:header>
+                    <f:DynamicPageHeader pinnable="true">
+                        <HBox>
+                            <smartFilterBar:SmartFilterBar
+                                id="smartFilterBar"
+                                entitySet="EstruturaSet"
+                                useToolbar="true"
+                                search="onSearch">
+                                <smartFilterBar:controlConfiguration>
+                                    <smartFilterBar:ControlConfiguration key="DbKey" label="Codigo" visibleInAdvancedArea="true"/>
+                                    <smartFilterBar:ControlConfiguration key="Descricao" label="Descricao" visibleInAdvancedArea="true"/>
+                                    <smartFilterBar:ControlConfiguration key="Tipo" label="Tipo" visibleInAdvancedArea="true"/>
+                                </smartFilterBar:controlConfiguration>
+                                <smartFilterBar:layoutData>
+                                    <FlexItemData shrinkFactor="0"/>
+                                </smartFilterBar:layoutData>
+                            </smartFilterBar:SmartFilterBar>
+                        </HBox>
+                    </f:DynamicPageHeader>
+                </f:header>
+
+                <f:content>
+                    <smartTable:SmartTable
+                        id="smartTreeTable"
+                        entitySet="EstruturaSet"
+                        smartFilterId="smartFilterBar"
+                        tableType="TreeTable"
+                        useVariantManagement="false"
+                        useTablePersonalisation="true"
+                        showRowCount="false"
+                        enableAutoBinding="false"
+                        header="Estrutura da agenda medica">
+                        <table:TreeTable
+                            id="treeTable"
+                            selectionMode="Single"
+                            enableColumnReordering="false"
+                            rowSelectionChange="onRowSelectionChange"
+                            visibleRowCountMode="Auto"
+                            minAutoRowCount="12"
+                            rows="{
+                                path: 'tree>/rows',
+                                parameters: {
+                                    arrayNames: ['children']
+                                }
+                            }">
+                            <table:columns>
+                                <table:Column>
+                                    <Label text="Codigo"/>
+                                    <table:template>
+                                        <Text text="{tree>DbKey}" wrapping="false"/>
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="Descricao"/>
+                                    <table:template>
+                                        <Text text="{tree>Descricao}" wrapping="false"/>
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="Tipo"/>
+                                    <table:template>
+                                        <Text text="{tree>Tipo}" wrapping="false"/>
+                                    </table:template>
+                                </table:Column>
+                            </table:columns>
+                        </table:TreeTable>
+                        <smartTable:customToolbar>
+                            <OverflowToolbar>
+                                <ToolbarSpacer/>
+                                <Button
+                                    id="Criar"
+                                    icon="sap-icon://add"
+                                    text="Nova estrutura"
+                                    tooltip="Criar novo tipo de estrutura"
+                                    press="onPressCriar"
+                                    type="Accept"/>
+                                <Button
+                                    id="Deletar"
+                                    icon="sap-icon://delete"
+                                    text="Excluir estrutura"
+                                    tooltip="Excluir estrutura"
+                                    press="onPressDeletar"
+                                    type="Reject"/>
+                            </OverflowToolbar>
+                        </smartTable:customToolbar>
+                        <smartTable:layoutData>
+                            <FlexItemData growFactor="1" baseSize="0%"/>
+                        </smartTable:layoutData>
+                    </smartTable:SmartTable>
+                </f:content>
+            </f:DynamicPage>
+        </f:beginColumnPages>
+
+        <f:midColumnPages>
+            <uxap:ObjectPageLayout
+                id="oplDetail"
+                showTitleInHeaderContent="true"
+                enableLazyLoading="true"
+                useIconTabBar="true"
+                headerContentPinned="true"
+                upperCaseAnchorBar="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{= ${view>/selectedItem/codigo} ? 'Codigo ' + ${view>/selectedItem/codigo} : 'Object Page'}" level="H2"/>
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{= ${view>/selectedItem/codigo} ? 'Codigo ' + ${view>/selectedItem/codigo} : 'Object Page'}" level="H4"/>
+                        </uxap:snappedHeading>
+                        <uxap:expandedContent>
+                            <Text text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha na tabela para abrir detalhes'}"/>
+                        </uxap:expandedContent>
+                        <uxap:snappedContent>
+                            <Text text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha na tabela para abrir detalhes'}"/>
+                        </uxap:snappedContent>
+                        <uxap:actions>
+                            <Button
+                                icon="sap-icon://full-screen"
+                                type="Transparent"
+                                tooltip="Expandir coluna"
+                                visible="{= ${view>/layout} !== 'MidColumnFullScreen'}"
+                                press="onExpandObjectPage"/>
+                            <Button
+                                icon="sap-icon://exit-full-screen"
+                                type="Transparent"
+                                tooltip="Restaurar colunas"
+                                visible="{= ${view>/layout} === 'MidColumnFullScreen'}"
+                                press="onRestoreObjectPage"/>
+                            <Button
+                                icon="sap-icon://decline"
+                                type="Transparent"
+                                tooltip="Fechar Object Page"
+                                press="onCloseObjectPage"/>
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+
+                <uxap:headerContent>
+                    <HBox wrap="Wrap" class="sapUiSmallMarginTopBottom">
+                        <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Codigo"/>
+                            <Text text="{view>/selectedItem/codigo}"/>
+                        </VBox>
+                        <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Tipo"/>
+                            <ObjectStatus text="{view>/selectedItem/tipo}" state="Information"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginBottom">
+                            <Label text="Parent Key"/>
+                            <Text text="{view>/selectedItem/parentKey}"/>
+                        </VBox>
+                    </HBox>
+                </uxap:headerContent>
+
+                <uxap:sections>
+                    <uxap:ObjectPageSection id="secResumo" title="Resumo">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecGeral" title="Dados Gerais">
+                                <uxap:blocks>
+                                    <VBox class="sapUiSmallMargin">
+                                        <ObjectAttribute title="Codigo" text="{view>/selectedItem/codigo}"/>
+                                        <ObjectAttribute title="Descricao" text="{view>/selectedItem/descricao}"/>
+                                        <ObjectAttribute title="Tipo" text="{view>/selectedItem/tipo}"/>
+                                        <ObjectAttribute title="Parent Key" text="{view>/selectedItem/parentKey}"/>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
+</mvc:View>
