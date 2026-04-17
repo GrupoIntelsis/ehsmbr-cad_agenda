@@ -26,7 +26,7 @@
                             <smartFilterBar:SmartFilterBar
                                 id="smartFilterBar"
                                 entitySet="EstruturaSet"
-                                useToolbar="true"
+                                useToolbar="false"
                                 search="onSearch"
                             >
                                 <smartFilterBar:controlConfiguration>
@@ -52,7 +52,9 @@
                         useTablePersonalisation="true"
                         showRowCount="false"
                         enableAutoBinding="true"
-                        initiallyVisibleFields="DbKey,ParentKey,Descricao,Tipo"
+                        initiallyVisibleFields="DbKey,Descricao,Tipo"
+                        ignoredFields="DrillState,HierLevel"
+                        enableExport="false"
                         enableAutoColumnWidth="true"
                         initialise="onSmartTableInitialise"
                         beforeRebindTable="onBeforeRebindTreeTable"
@@ -97,34 +99,34 @@
                 <uxap:headerTitle>
                     <uxap:ObjectPageDynamicHeaderTitle>
                         <uxap:expandedHeading>
-                            <Title text="{= ${view>/selectedItem/codigo} ? 'Codigo ' + ${view>/selectedItem/codigo} : 'Object Page'}" level="H2"/>
+                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha de estrutura para abrir detalhes'}" level="H2"/>
                         </uxap:expandedHeading>
                         <uxap:snappedHeading>
-                            <Title text="{= ${view>/selectedItem/codigo} ? 'Codigo ' + ${view>/selectedItem/codigo} : 'Object Page'}" level="H4"/>
+                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha de estrutura para abrir detalhes'}" level="H4"/>
                         </uxap:snappedHeading>
                         <uxap:expandedContent>
-                            <Text text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha na tabela para abrir detalhes'}"/>
+                            <Text text="{= ${view>/selectedItem/codigo} ? 'Código ' + ${view>/selectedItem/codigo} : 'Código ' + ${view>/selectedItem/codigo}}" />
                         </uxap:expandedContent>
                         <uxap:snappedContent>
-                            <Text text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha na tabela para abrir detalhes'}"/>
+                            <Text text="{= ${view>/selectedItem/codigo} ? 'Código ' + ${view>/selectedItem/codigo} : 'Código ' + ${view>/selectedItem/codigo}}" />
                         </uxap:snappedContent>
                         <uxap:actions>
                             <Button
                                 icon="sap-icon://full-screen"
                                 type="Transparent"
-                                tooltip="Expandir coluna"
+                                tooltip="Expandir detalhes"
                                 visible="{= ${view>/layout} !== 'MidColumnFullScreen'}"
                                 press="onExpandObjectPage"/>
                             <Button
                                 icon="sap-icon://exit-full-screen"
                                 type="Transparent"
-                                tooltip="Restaurar colunas"
+                                tooltip="Restaurar detalhes"
                                 visible="{= ${view>/layout} === 'MidColumnFullScreen'}"
                                 press="onRestoreObjectPage"/>
                             <Button
                                 icon="sap-icon://decline"
                                 type="Transparent"
-                                tooltip="Fechar Object Page"
+                                tooltip="Fechar detalhes"
                                 press="onCloseObjectPage"/>
                         </uxap:actions>
                     </uxap:ObjectPageDynamicHeaderTitle>
@@ -133,7 +135,7 @@
                 <uxap:headerContent>
                     <HBox wrap="Wrap" class="sapUiSmallMarginTopBottom">
                         <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
-                            <Label text="Codigo"/>
+                            <Label text="Código"/>
                             <Text text="{view>/selectedItem/codigo}"/>
                         </VBox>
                         <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
@@ -141,7 +143,7 @@
                             <ObjectStatus text="{view>/selectedItem/tipo}" state="Information"/>
                         </VBox>
                         <VBox class="sapUiSmallMarginBottom">
-                            <Label text="Parent Key"/>
+                            <Label text="Código superior"/>
                             <Text text="{view>/selectedItem/parentKey}"/>
                         </VBox>
                     </HBox>
@@ -153,10 +155,10 @@
                             <uxap:ObjectPageSubSection id="subSecGeral" title="Dados Gerais">
                                 <uxap:blocks>
                                     <VBox class="sapUiSmallMargin">
-                                        <ObjectAttribute title="Codigo" text="{view>/selectedItem/codigo}"/>
-                                        <ObjectAttribute title="Descricao" text="{view>/selectedItem/descricao}"/>
+                                        <ObjectAttribute title="Código" text="{view>/selectedItem/codigo}"/>
+                                        <ObjectAttribute title="Descrição" text="{view>/selectedItem/descricao}"/>
                                         <ObjectAttribute title="Tipo" text="{view>/selectedItem/tipo}"/>
-                                        <ObjectAttribute title="Parent Key" text="{view>/selectedItem/parentKey}"/>
+                                        <ObjectAttribute title="Código superior" text="{view>/selectedItem/parentKey}"/>
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>

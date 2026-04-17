@@ -1,0 +1,134 @@
+﻿<core:FragmentDefinition
+		xmlns:core="sap.ui.core"
+		xmlns:form="sap.ui.layout.form"
+		xmlns="sap.m">
+	<Dialog
+		id="createDialog"
+		title="Nova estrutura"
+		contentWidth="720px"
+		stretchOnPhone="true"
+		draggable="true"
+		resizable="true"
+		afterClose="onCloseDialog"
+		class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer">
+		<beginButton>
+			<Button text="Salvar" type="Emphasized" press="handleDialogSaveButton" visible="{dialogState>/showSave}"/>
+		</beginButton>
+		<endButton>
+			<Button text="Cancelar" press="onCloseDialog"/>
+		</endButton>
+		<content>
+			<Wizard id="wizCreate" showNextButton="true" stepActivate="onWizardStepActivate">
+				<WizardStep id="wsMatricula" title="Definição de estrutura" validated="false">
+					<form:SimpleForm
+						editable="true"
+						layout="ResponsiveGridLayout"
+						labelSpanL="4"
+						labelSpanM="4"
+						columnsL="2"
+						columnsM="2"
+						emptySpanL="0"
+						emptySpanM="0">
+						<Label text="Tipo de estrutura" labelFor="dgTpEstrutura"/>
+						<Select
+							id="dgTpEstrutura"
+							forceSelection="true"
+							change="handleChangeSelect"
+                            required="true"
+							width="100%"
+                        >
+							<items>
+								<core:Item key="" text=""/>
+								<core:Item key="1" text="Unidade de atendimento"/>
+								<core:Item key="2" text="Sala"/>
+							</items>
+						</Select>
+						<Label text="Vinculada à unidade de saúde" labelFor="dgUniatend"/>
+						<Input
+							id="dgUniatend"
+							placeholder="Escolha uma unidade de atendimento..."
+							visible="{= ${dgTpEstrutura>/selectedKey} === '2' }"
+							showValueHelp="true"
+							valueHelpRequest="onValueHelp"
+							showClearIcon="true"
+							tooltip="Unidades de atendimento"
+							required="true"
+                            valueHelpOnly="true"
+							change="onUniatendChange"
+						/>
+						<Label text="Observação" labelFor="dgObservacao"/>
+						<TextArea
+							id="dgObservacao"
+							growing="true"
+							rows="3"
+							placeholder="Notas adicionais para o atendimento"
+                        />
+					</form:SimpleForm>
+				</WizardStep>
+
+				<WizardStep id="wsLocal" title="Local e exame" validated="false">
+					<form:SimpleForm
+						editable="true"
+						layout="ResponsiveGridLayout"
+						labelSpanL="4"
+						labelSpanM="4"
+						columnsL="2"
+						columnsM="2"
+						emptySpanL="0"
+						emptySpanM="0">
+						<Label text="Sala" labelFor="dgSala"/>
+						<Input
+							id="dgSala"
+							placeholder="Escolha uma sala..."
+							showValueHelp="true"
+							valueHelpRequest="onValueHelp"
+							showClearIcon="true"
+							tooltip="Salas filtradas por unidade"
+							required="true"
+                            valueHelpOnly="true"
+							change="onSalaChange"
+						/>
+						<Label text="Exame agendado" labelFor="dgExamesAgendados"/>
+						<Input
+							id="dgExamesAgendados"
+							placeholder="Escolha o exame..."
+							showValueHelp="true"
+							valueHelpRequest="onValueHelp"
+							showClearIcon="true"
+							tooltip="Exames filtrados por Sala"
+                            valueHelpOnly="true"
+							change="onExamesAgendadosChange"
+						/>
+					</form:SimpleForm>
+				</WizardStep>
+
+				<WizardStep id="wsAgendamento" title="Agendamento" validated="false">
+					<form:SimpleForm
+						editable="true"
+						layout="ResponsiveGridLayout"
+						labelSpanL="4"
+						labelSpanM="4"
+						columnsL="2"
+						columnsM="2"
+						emptySpanL="0"
+						emptySpanM="0">
+						<Label text="Agendamento em" labelFor="dgStartDate"/>
+						<DateTimePicker
+							id="dgStartDate"
+							displayFormat="short"
+							required="true"
+							change="handleCreateChange"
+                        />
+						<Label text="Agendamento até" labelFor="dgEndDate"/>
+						<DateTimePicker
+							id="dgEndDate"
+							displayFormat="short"
+							required="true"
+							change="handleCreateChange"
+                        />
+					</form:SimpleForm>
+				</WizardStep>
+			</Wizard>
+		</content>
+	</Dialog>
+</core:FragmentDefinition>

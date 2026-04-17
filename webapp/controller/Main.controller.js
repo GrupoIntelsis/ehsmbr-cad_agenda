@@ -43,7 +43,6 @@ sap.ui.define([
                 hierarchyParentNodeFor: "ParentKey",
                 hierarchyDrillStateFor: "DrillState"
             };
-            oBindingParams.parameters.numberOfExpandedLevels = 1;
         },
 
         onRowSelectionChange(oEvent) {
