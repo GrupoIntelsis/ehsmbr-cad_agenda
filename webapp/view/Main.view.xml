@@ -1,5 +1,6 @@
-<mvc:View 
-    xmlns:table="sap.ui.table" 
+<mvc:View
+    xmlns:table="sap.ui.table"
+    xmlns:form="sap.ui.layout.form"
     controllerName="ehsmbr.cadagenda.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -30,9 +31,9 @@
                                 search="onSearch"
                             >
                                 <smartFilterBar:controlConfiguration>
-                                    <smartFilterBar:ControlConfiguration key="DbKey" label="Codigo" visibleInAdvancedArea="true"/>
-                                    <smartFilterBar:ControlConfiguration key="Descricao" label="Descricao" visibleInAdvancedArea="true"/>
-                                    <smartFilterBar:ControlConfiguration key="Tipo" label="Tipo" visibleInAdvancedArea="true"/>
+                                    <smartFilterBar:ControlConfiguration key="DbKey"    label="Código"           visibleInAdvancedArea="true"/>
+                                    <smartFilterBar:ControlConfiguration key="Descricao" label="Descrição"         visibleInAdvancedArea="true"/>
+                                    <smartFilterBar:ControlConfiguration key="Tipo"     label="Tipo de estrutura" visibleInAdvancedArea="true"/>
                                 </smartFilterBar:controlConfiguration>
                                 <smartFilterBar:layoutData>
                                     <FlexItemData shrinkFactor="0"/>
@@ -58,6 +59,7 @@
                         enableAutoColumnWidth="true"
                         initialise="onSmartTableInitialise"
                         beforeRebindTable="onBeforeRebindTreeTable"
+                        afterRebindTable="onAfterRebindTreeTable"
                         header="Estrutura da agenda médica"
                     >
                         <smartTable:customToolbar>
@@ -86,86 +88,274 @@
                 </f:content>
             </f:DynamicPage>
         </f:beginColumnPages>
-
         <f:midColumnPages>
             <uxap:ObjectPageLayout
                 id="oplDetail"
-                showTitleInHeaderContent="true"
                 enableLazyLoading="true"
-                useIconTabBar="true"
-                headerContentPinned="true"
+                useIconTabBar="false"
                 upperCaseAnchorBar="false"
             >
                 <uxap:headerTitle>
                     <uxap:ObjectPageDynamicHeaderTitle>
                         <uxap:expandedHeading>
-                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha de estrutura para abrir detalhes'}" level="H2"/>
+                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha para abrir detalhes'}" level="H2"/>
                         </uxap:expandedHeading>
                         <uxap:snappedHeading>
-                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha de estrutura para abrir detalhes'}" level="H4"/>
+                            <Title text="{= ${view>/selectedItem/descricao} || 'Selecione uma linha para abrir detalhes'}" level="H4"/>
                         </uxap:snappedHeading>
                         <uxap:expandedContent>
-                            <Text text="{= ${view>/selectedItem/codigo} ? 'Código ' + ${view>/selectedItem/codigo} : 'Código ' + ${view>/selectedItem/codigo}}" />
+                            <Text text="{= ${view>/selectedItem/codigo} ? ${view>/selectedItem/codigo} : ''}"/>
                         </uxap:expandedContent>
                         <uxap:snappedContent>
-                            <Text text="{= ${view>/selectedItem/codigo} ? 'Código ' + ${view>/selectedItem/codigo} : 'Código ' + ${view>/selectedItem/codigo}}" />
+                            <Text text="{= ${view>/selectedItem/codigo} ? ${view>/selectedItem/codigo} : ''}"/>
                         </uxap:snappedContent>
                         <uxap:actions>
-                            <Button
-                                icon="sap-icon://full-screen"
-                                type="Transparent"
-                                tooltip="Expandir detalhes"
-                                visible="{= ${view>/layout} !== 'MidColumnFullScreen'}"
-                                press="onExpandObjectPage"/>
-                            <Button
-                                icon="sap-icon://exit-full-screen"
-                                type="Transparent"
-                                tooltip="Restaurar detalhes"
-                                visible="{= ${view>/layout} === 'MidColumnFullScreen'}"
-                                press="onRestoreObjectPage"/>
-                            <Button
-                                icon="sap-icon://decline"
-                                type="Transparent"
-                                tooltip="Fechar detalhes"
-                                press="onCloseObjectPage"/>
+                            <Button icon="sap-icon://full-screen"    type="Transparent" tooltip="Expandir"  visible="{= ${view>/layout} !== 'MidColumnFullScreen'}" press="onExpandObjectPage"/>
+                            <Button icon="sap-icon://exit-full-screen" type="Transparent" tooltip="Restaurar" visible="{= ${view>/layout} === 'MidColumnFullScreen'}"  press="onRestoreObjectPage"/>
+                            <Button icon="sap-icon://decline"         type="Transparent" tooltip="Fechar"    press="onCloseObjectPage"/>
                         </uxap:actions>
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
 
-                <uxap:headerContent>
-                    <HBox wrap="Wrap" class="sapUiSmallMarginTopBottom">
-                        <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
-                            <Label text="Código"/>
-                            <Text text="{view>/selectedItem/codigo}"/>
-                        </VBox>
-                        <VBox class="sapUiTinyMarginEnd sapUiSmallMarginBottom">
-                            <Label text="Tipo"/>
-                            <ObjectStatus text="{view>/selectedItem/tipo}" state="Information"/>
-                        </VBox>
-                        <VBox class="sapUiSmallMarginBottom">
-                            <Label text="Código superior"/>
-                            <Text text="{view>/selectedItem/parentKey}"/>
-                        </VBox>
-                    </HBox>
-                </uxap:headerContent>
-
                 <uxap:sections>
-                    <uxap:ObjectPageSection id="secResumo" title="Resumo">
+                    <uxap:ObjectPageSection
+                        id="secLocalSso"
+                        title="Local SSO"
+                        visible="{= ${view>/selectedItem/rawTipo} === '0'}">
                         <uxap:subSections>
-                            <uxap:ObjectPageSubSection id="subSecGeral" title="Dados Gerais">
+                            <uxap:ObjectPageSubSection id="subSecLocalSso" title="">
                                 <uxap:blocks>
-                                    <VBox class="sapUiSmallMargin">
-                                        <ObjectAttribute title="Código" text="{view>/selectedItem/codigo}"/>
-                                        <ObjectAttribute title="Descrição" text="{view>/selectedItem/descricao}"/>
-                                        <ObjectAttribute title="Tipo" text="{view>/selectedItem/tipo}"/>
-                                        <ObjectAttribute title="Código superior" text="{view>/selectedItem/parentKey}"/>
-                                    </VBox>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanL="4" 
+                                        labelSpanM="4"
+                                        columnsL="2"  
+                                        columnsM="1">
+                                        <form:content>
+                                            <Label text="Código SSO"/>
+                                            <Text text="{view>/detailData/localSso/codigo}"/>
+                                            <Label text="Descrição"/>
+                                            <Text text="{view>/detailData/localSso/descricao}"/>
+                                        </form:content>
+                                    </form:SimpleForm>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="secEndereco"
+                        title="Endereço"
+                        visible="{= ${view>/selectedItem/rawTipo} === '0'}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecEndereco" title="">
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4"
+                                        columnsL="2"  columnsM="1">
+                                        <form:content>
+                                            <Label text="Linha de endereço 1"/>
+                                            <Text text="{view>/detailData/endereco/linha1}"/>
+                                            <Label text="Linha de endereço 2"/>
+                                            <Text text="{view>/detailData/endereco/linha2}"/>
+                                            <Label text="País"/>
+                                            <Text text="{view>/detailData/endereco/pais}"/>
+                                            <Label text="Cidade"/>
+                                            <Text text="{view>/detailData/endereco/cidade}"/>
+                                            <Label text="Rua"/>
+                                            <Text text="{view>/detailData/endereco/rua}"/>
+                                            <Label text="Código postal"/>
+                                            <Text text="{view>/detailData/endereco/codPostal}"/>
+                                            <Label text="Região"/>
+                                            <Text text="{view>/detailData/endereco/regiao}"/>
+                                            <Label text="Telefone"/>
+                                            <Text text="{view>/detailData/endereco/telefone}"/>
+                                        </form:content>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="secResponsaveis"
+                        title="Responsáveis pela Estrutura"
+                        visible="{= ${view>/selectedItem/rawTipo} === '0'}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecResponsaveis" title="">
+                                <Table
+                                    id="tblResponsaveis"
+                                    items="{view>/detailData/responsaveis}"
+                                    mode="MultiSelect"
+                                    noDataText="Nenhum responsável cadastrado"
+                                    width="100%"
+                                >
+                                    <headerToolbar>
+                                        <OverflowToolbar>
+                                            <ToolbarSpacer/>
+                                            <Button icon="sap-icon://add"    text="Adicionar"           press="onAddResponsavel"/>
+                                            <Button icon="sap-icon://delete" text="Excluir selecionados" press="onDeleteResponsavel" type="Reject"/>
+                                        </OverflowToolbar>
+                                    </headerToolbar>
+                                    <columns>
+                                        <Column><Text text="Matrícula"/></Column>
+                                        <Column><Text text="Nome"/></Column>
+                                        <Column><Text text="Função"/></Column>
+                                        <Column><Text text="CPF"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{view>matricula}"/>
+                                                <Text text="{view>nome}"/>
+                                                <Text text="{view>funcao}"/>
+                                                <Text text="{view>cpf}"/>
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="secUnidadeAtribuida"
+                        title="Unidade Atribuída"
+                        visible="{= ${view>/selectedItem/rawTipo} === '1'}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecUnidadeAtribuida" title="">
+                                <form:SimpleForm
+                                    editable="false"
+                                    layout="ResponsiveGridLayout"
+                                    labelSpanL="4" labelSpanM="4"
+                                    columnsL="2"  columnsM="1">
+                                    <form:content>
+                                        <Label text="Unidade de Atendimento"/>
+                                        <Text text="{view>/detailData/unidadeAtribuida}"/>
+                                    </form:content>
+                                </form:SimpleForm>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="secExames"
+                        title="Exames Atendidos"
+                        visible="{= ${view>/selectedItem/rawTipo} === '1'}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecExames" title="">
+                                <Table
+                                    id="tblExames"
+                                    items="{view>/detailData/exames}"
+                                    mode="MultiSelect"
+                                    noDataText="Nenhum exame cadastrado"
+                                    width="100%">
+                                    <headerToolbar>
+                                        <OverflowToolbar>
+                                            <ToolbarSpacer/>
+                                            <Button icon="sap-icon://add"    text="Adicionar"           press="onAddExame"/>
+                                            <Button icon="sap-icon://delete" text="Excluir selecionados" press="onDeleteExame" type="Reject"/>
+                                        </OverflowToolbar>
+                                    </headerToolbar>
+                                    <columns>
+                                        <Column><Text text="Cód. TUSS"/></Column>
+                                        <Column><Text text="Exame"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{view>codTuss}"/>
+                                                <Text text="{view>exame}"/>
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="secHorarios"
+                        title="Horários de Funcionamento"
+                        visible="{= ${view>/selectedItem/rawTipo} === '1'}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecHorarios" title="">
+                                <PlanningCalendar
+                                    id="planCal"
+                                    startDate="{view>/detailData/planStartDate}"
+                                    viewKey="fullDay"
+                                    width="100%"
+                                    showIntervalHeaders="false"
+                                    showEmptyIntervalHeaders="false"
+                                    showWeekNumbers="false"
+                                    showDayNamesLine="false"
+                                    startDateChange="onPlanCalStartDateChange">
+                                    <rows>
+                                        <PlanningCalendarRow id="planRowDog" title="Domingo"      key="dog"/>
+                                        <PlanningCalendarRow id="planRowSeg" title="Segunda-feira" key="seg"/>
+                                        <PlanningCalendarRow id="planRowTer" title="Terça-feira"   key="ter"/>
+                                        <PlanningCalendarRow id="planRowQua" title="Quarta-feira"  key="qua"/>
+                                        <PlanningCalendarRow id="planRowQui" title="Quinta-feira"  key="qui"/>
+                                        <PlanningCalendarRow id="planRowSex" title="Sexta-feira"   key="sex"/>
+                                        <PlanningCalendarRow id="planRowSab" title="Sábado"        key="sab"/>
+                                    </rows>
+                                    <views>
+                                        <PlanningCalendarView
+                                            key="fullDay"
+                                            intervalType="Hour"
+                                            description="Dia"
+                                            intervalsS="24"
+                                            intervalsM="24"
+                                            intervalsL="24"/>
+                                    </views>
+                                </PlanningCalendar>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="secObs" title="Observações">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecObs" title="">
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        columnsL="1" columnsM="1">
+                                        <form:content>
+                                            <Text text="{view>/detailData/obs}" wrapping="true"/>
+                                        </form:content>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="secAuditoria" title="Auditoria">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subSecAuditoria" title="">
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4"
+                                        columnsL="2"  columnsM="1">
+                                        <form:content>
+                                            <Label text="Usuário"/>
+                                            <Text text="{view>/detailData/auditoria/usuario}"/>
+                                            <Label text="Data de registro"/>
+                                            <Text text="{view>/detailData/auditoria/dataRegistro}"/>
+                                            <Label text="Hora de registro"/>
+                                            <Text text="{view>/detailData/auditoria/horaRegistro}"/>
+                                            <Label text="Data de modificação"/>
+                                            <Text text="{view>/detailData/auditoria/dataModificacao}"/>
+                                            <Label text="Hora de modificação"/>
+                                            <Text text="{view>/detailData/auditoria/horaModificacao}"/>
+                                        </form:content>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
                 </uxap:sections>
             </uxap:ObjectPageLayout>
         </f:midColumnPages>
+
     </f:FlexibleColumnLayout>
 </mvc:View>
